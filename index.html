@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:">
+<title>shinonome2bas</title>
+</head><body>
+<h1>shinonome2bas</h1>
+
+<input id=inpcode value=224>
+<input id=inpja value="福"><br>
+<textarea id=tapattern>
+</textarea>
+<textarea id=tabas>
+</textarea><br>
+<button id=btnij>RUN on IchigoJam web</button>
+
+<hr>
+Font: Public Domain <a href=http://openlab.ring.gr.jp/efont/shinonome/>shinonome font family</a> → <a href=https://github.com/code4fukui/shinonome-font>shinonome-font</a><br>
+<a href=https://github.com/code4fukui/shinonome2bas/>src on GitHub</a><br>
+
+<script type="module">
+import { ShinonomeFont } from "./ShinonomeFont.js";
+
+const font = await ShinonomeFont.create();
+
+const pattern2bas = (p, code = 224) => {
+  const res = [];
+  res.push("POKE#" + (code * 8).toString(16));
+  for (let k = 0; k < 4; k++) {
+    const r = Math.floor(k / 2) * 8;
+    const c = k % 2 * 8;
+    for (let i = 0; i < 8; i++) {
+      let n = 0;
+      for (let j = 0; j < 8; j++) {
+        n |= p[r + i][c + j] == "1" ? 1 << (7 - j) : 0;
+      }
+      res.push("," + n);
+    }
+  }
+  res.push(`\n?CHR$(${code},${code + 1},LEFT,LEFT,DOWN,${code + 2},${code + 3})\n`);
+  return res.join("");
+};
+
+inpja.oninput = inpcode.oninput = () => {
+  const c = inpja.value[0];
+  if (!c) return;
+  const code = parseInt(inpcode.value);
+  const p = font.getBitPattern(c);
+  tapattern.value = p.join("\n");
+  tabas.value = pattern2bas(p, code);
+};
+inpja.oninput();
+
+btnij.onclick = () => {
+  const bas = tabas.value;
+  const url = "https://fukuno.jig.jp/app/IchigoJam/#" + encodeURIComponent(bas);
+  open(url, "_blank");
+};
+
+</script>
+
+<style>
+body {
+  font-family: sans-serif;
+}
+textarea {
+  height: 26em;
+  width: 20em;
+  margin-top: 1em;
+}
+a {
+  color: gray !important;
+}
+</style>
+</body></html>
