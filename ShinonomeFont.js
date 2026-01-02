@@ -2,9 +2,10 @@ export class ShinonomeFont {
   static async create(size = 16, fontname = "kanjic") {
     const url = "https://code4fukui.github.io/shinonome-font/" + size + "/" + fontname + "/font_src.bit";
     const font = await (await fetch(url)).text();
-    return new ShinonomeFont(font);
+    return new ShinonomeFont(size, font);
   }
-  constructor(font) {
+  constructor(size, font) {
+    this.size = size;
     this.ss = font.split("\n");
   }
   getBitPattern(c) {
@@ -21,7 +22,7 @@ export class ShinonomeFont {
       const s = ss[i];
       if (s.endsWith(chk)) {
         const res = [];
-        for (let j = i - 16; j < i; j++) {
+        for (let j = i - this.size; j < i; j++) {
           res.push(cnv(ss[j]));
         }
         return res;
